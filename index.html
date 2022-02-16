@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>클립 아카이브</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"
+        integrity="sha384-LtrjvnR4Twt/qOuYxE721u19sVFLVSA4hf/rRt6PrZTmiPltdZcI7q7PXQBYTKyf"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/5a25945e44.js" crossorigin="anonymous"></script>
+
+    <style>
+        .image-avatar {
+            border-radius: 6000px;
+        }
+
+        nav>a {
+            font-weight: bold;
+            color: #000;
+            font-size: 1.8rem;
+        }
+
+        .clip>item {
+            display: block;
+            float: left;
+            width: 23%;
+            margin: 1.5% 1.0%;
+            background: #fff;
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.16);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        label {
+            display: block;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
+            overflow: hidden;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 10px;
+            border-radius: 3rem;
+        }
+
+        .modal label {
+            width: 100%;
+            margin: 0;
+        }
+
+        item>a>img {
+            width: 100%
+        }
+
+        /* github badge */
+        div.badge {
+            display: inline-block;
+            border-radius: .75em;
+            font-family: 'Dejavu Sans', 'Arial';
+        }
+
+        .badge {
+            padding: 0;
+        }
+
+        div.badge div {
+            display: inline-block;
+            float: left;
+            text-transform: lowercase;
+            color: #FFF;
+            text-shadow: 0px .1em 0px rgba(0, 0, 0, 0.5);
+            margin: 0;
+            padding: 0;
+            border: 0;
+        }
+
+        div.badge div:first-child,
+        div.badge div:first-child span {
+            border-top-left-radius: .25em;
+            border-bottom-left-radius: .25em;
+        }
+
+        div.badge div:last-child,
+        div.badge div:last-child span {
+            border-top-right-radius: .25em;
+            border-bottom-right-radius: .25em;
+        }
+
+        div.badge div span {
+            display: inline-block;
+            background: linear-gradient(180deg, rgba(187, 187, 187, .1) 0%, rgba(0, 0, 0, .1) 100%);
+            padding: .25em .5em;
+            box-sizing: border-box;
+        }
+
+        .badge .name {
+            background: #555555;
+        }
+
+        .badge .status.green {
+            background: #44cc11;
+        }
+
+        .badge .status.yellow {
+            background: #ddcc00;
+        }
+
+        .badge .status.blue {
+            background: #00aadd;
+        }
+
+        .badge .status.red {
+            background: #cc1100;
+        }
+
+        .badge .status.gray {
+            background: #cccccc;
+        }
+
+        /* model size up  */
+        @media (min-width: 768px) {
+            .modal-xl {
+                width: 90%;
+                max-width: 1320px;
+            }
+        }
+
+        /* model video full width */
+        .modal-body>video {
+            width: 100%
+        }
+
+
+        .item-text {
+            position: absolute;
+            box-sizing: border-box;
+            color: aliceblue;
+            background-color: rgba(0, 0, 0, 0.6);
+            font-size: 0.8rem;
+        }
+
+        .left-bottom {
+            left: 10px;
+            bottom: 5px;
+        }
+
+        .right-bottom {
+            right: 10px;
+            bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-light">
+        <a href="https://www.twitch.tv/여기에_주소를_넣으세요">
+            <img class="image-avatar" alt="아바타"
+                src="https://static-cdn.jtvnw.net/jtv_user_pictures/여기에_프로필_이미지를_넣으세요-70x70.png">
+            클립 임시 저장소
+        </a>
+        
+        
+        <form class="form-inline">
+            <select id="sorter" class="form-select form-select-sm mr-sm-1" aria-label="정렬 방법">
+                <option selected>정렬 방법</option>
+                <option value="view">시청순</option>
+                <option value="date">날짜순</option>
+            </select>
+            <input id="searchText" class="form-control mr-sm-2" type="search" placeholder="검색어를 입력하세요" aria-label="Search">
+            <button id="searchBtn" class="btn btn-outline-success my-2 my-sm-0" type="button">검색</button>
+        </form>
+    </nav>
+    <div class="container-fluid">
+        <div class="clip" id="clips">
+        </div>
+    </div>
+    <div class="modal fade" id="clipModal" role="dialog">
+        <div class="modal-dialog  modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <label title=""
+                            id="modal-title"></label>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <video controls name="media" class="videoModal">
+                        <source id ="modal-video"
+                            src=""
+                            type="video/mp4">
+                    </video>
+                </div>
+                <div class="modal-footer">
+                    <div class="badge">
+                        <div class="name">
+                            <span>
+                                생성일
+                            </span>
+                        </div>
+                        <div class="status green">
+                            <span id="modal-ceated_at">
+                                2020-01-01 10:00:00
+                            </span>
+                        </div>
+                    </div>
+                    <div class="badge">
+                        <div class="name">
+                            <span>
+                                시청수
+                            </span>
+                        </div>
+                        <div class="status gray">
+                            <span id="modal-view_count">
+                                1000
+                            </span>
+                        </div>
+                    </div>
+                    <div class="badge">
+                        <div class="name">
+                            <span>
+                                제작자
+                            </span>
+                        </div>
+                        <div class="status yellow">
+                            <span id="modal-creator_name">
+                                getCurrentThread
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <script>
+            //create items -> items
+            $(function () {
+                $.ajax({
+                    type: "GET",
+                    url: "/clips/clips.json",
+                    dataType: "json",
+                    success: function (args) {
+                        var $clips = $("#clips");
+                        for (var i = 0; i < args.length; i++) {
+                            var title = args[i].title;
+                            var creator_name = args[i].creator_name;
+                            var created_at = args[i].created_at;
+                            var view_count = args[i].view_count;
+                            var download_url = args[i].download_url;
+                            var thumbnail_url = args[i].thumbnail_url;
+                            $clips.append(`<item class="position-relative">
+                                <label class="title">${title}</label>
+                                <a data-toggle="modal" data-target="#clipModal" href="#">
+                                    <img alt="${title}" src="clips/${thumbnail_url}" />
+                                    <div class="item-text left-bottom created_at">${created_at}</div>
+                                    <div class="item-text right-bottom"><i class="far fa-eye"></i> <span
+                                            class="view_count">${view_count}</span></div>
+                                </a>
+                                <a hidden class="creator_name">${creator_name}</a>
+                                <a hidden class="download_url">clips/${download_url}</a>
+                            </item>`)
+                        }
+                    },
+                    error: function (e) {
+                        alert(e.responseText);
+                    }
+                });
+            });
+
+            // if select #sorter change -> sort
+            $("#sorter").change(function () {
+                var sort = $(this).val();
+                if (sort == "view") {
+                    //sort by view_count
+                    $("#clips").children().sort(function (a, b) {
+                        return $(b).find(".view_count").text() - $(a).find(".view_count").text();
+                    }).appendTo("#clips");
+                } else if (sort == "date") {
+                    //sort by created_at
+                    // create_at is date string -> convert to date object
+                    $("#clips").children().sort(function (a, b) {
+                        var aDate = new Date($(a).find(".created_at").text());
+                        var bDate = new Date($(b).find(".created_at").text());
+                        return aDate - bDate;
+                    }).appendTo("#clips");
+                }
+            });
+
+            // if click #searchBtn -> search
+            $("#searchBtn").click(function () {
+                var searchText = $("#searchText").val();
+                if(searchText == ""){
+                    $("#clips").children().each(function () {
+                        $(this).show();
+                    });
+                    return;
+                }
+                $("#clips").children().each(function () {
+                    if ($(this).find(".title").text().indexOf(searchText) == -1) {
+                        $(this).hide();
+                    } else {
+                        $(this).show();
+                    }
+                });
+            });
+
+            // items click event => modal update
+            $('#clipModal').on('show.bs.modal', function(e){
+                var $item = $(e.relatedTarget.parentElement);
+                var title = $item.find('.title').get(0).innerText;
+                var created_at = $item.find('.created_at').get(0).innerText;
+                var view_count = $item.find('.view_count').get(0).innerText;
+                var creator_name = $item.find('.creator_name').get(0).innerText;
+                var download_url = $item.find('.download_url').get(0).innerText;
+                $("#modal-title").attr('title',title).text(title);
+                $("#modal-ceated_at").text(created_at);
+                $("#modal-view_count").text(view_count);
+                $("#modal-creator_name").text(creator_name);
+                $("#modal-video").attr("src", download_url );
+                $('.videoModal').get(0).load();
+            })
+
+            // modal close event => video.pause()
+            $('#clipModal').on('hidden.bs.modal', function (e) {
+                var $video = $('.videoModal').get(0);
+                $video.pause();
+                $video.currentTime = 0;
+            })
+        </script>
+    </div>
+</body>
+
+</html>
